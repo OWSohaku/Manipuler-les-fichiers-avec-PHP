@@ -3,11 +3,11 @@
     <!DOCTYPE html>
     <html>
 
-<script
-        src="http://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous">
-</script>
+    <script
+            src="http://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous">
+    </script>
 
     <body>
 
@@ -25,39 +25,38 @@
             } else {
                 while ($file = readDir($dir)) {
                     if (($file != '.') && ($file != '..')) {
-                        if (is_dir($cheminDossier . '/' . $file)){
+                        if (is_dir($cheminDossier . '/' . $file)) {
                             $titre = ucfirst($file);
-                            ?><br><div class="dossier" ><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span><br><?php
-                            echo $titre;?></div> <?php
+                            ?><br>
+                            <div class="dossier"><img src="assets/images/dossier.png" alt=""><br><?php
+                                echo $titre; ?></div> <?php
                         } else {
-                            ?><div><br><span class="glyphicon glyphicon-file" aria-hidden="true"><?php
-                            echo " " . $file;?></div><br><?php
+                            ?>
+                            <div><br><img src="assets/images/fichier.png" alt=""><?php
+                                echo " " . $file; ?></div><br><?php
                         }
                         ?>
-                        <form action="index.php" method="post" name="delname" >
+                        <form action="index.php" method="post" name="delname">
                             <input type="submit" value="Supprimer" class="btn btn-danger">
                             <input type="hidden" name="delname" value="<?= $cheminDossier . '/' . $file ?>"><br>
                         </form>
                         <?php
-                        if (isset($_POST['delname'])) {
-                            @unlink($_POST['delname']);
-                        }
 
                         isset($file) ? $extension = substr(strrchr($file, "."), 1) : '';
                         if (is_dir($cheminDossier . '/' . $file) == false && $extension == 'txt' ||
                             $extension == 'html') { ?>
-                            <form  action="" method="post" name="modifname">
+                            <form action="" method="post" name="modifname">
                                 <input type="submit" value="Editer" class="btn btn-success">
                                 <input type="hidden" name="modifname"
                                        value="<?= $cheminDossier . '/' . $file ?>"><br><br>
                             </form> <?php
 
                         } ?>
-                        <ul class="fichier" ><?php
-                        if (is_dir($cheminDossier . '/' . $file)) {
-                            explore($cheminDossier . '/' . $file);
-                        }?>
-                            </ul> <?php
+                        <ul class="fichier"><?php
+                            if (is_dir($cheminDossier . '/' . $file)) {
+                                explore($cheminDossier . '/' . $file);
+                            } ?>
+                        </ul> <?php
 
                     }
                 }
@@ -65,17 +64,39 @@
             }
         }
 
-            if (isset($_POST['modifname'])) {
-                $modifname = file_get_contents($_POST['modifname']);
-            }
+        if (isset($_POST['modifname'])) {
+            $modifname = file_get_contents($_POST['modifname']);
+        }
 
 
-            if (isset($_POST['editcontent']) && isset($_POST['path'])) {
-                $fichier = $_POST['path'];
-                $ouvre = fopen($fichier, 'w');
-                fwrite($ouvre, $_POST['editcontent']);
-                fclose($ouvre);
+        if (isset($_POST['editcontent']) && isset($_POST['path'])) {
+            $fichier = $_POST['path'];
+            $ouvre = fopen($fichier, 'w');
+            fwrite($ouvre, $_POST['editcontent']);
+            fclose($ouvre);
+        }
+
+        function dir_is_empty($dir) {
+            $handle = opendir($dir);
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry != "." && $entry != "..") {
+                    return FALSE;
+                }
             }
+            return TRUE;
+        }
+
+        if (isset($_POST['delname']) && is_dir($_POST['delname'])) {
+            $dir = $_POST['delname'];
+            if (dir_is_empty($dir)) {
+                rmdir($_POST['delname']);
+            } else {
+                ?><h1>Veuillez supprimer tous les fichiers avant de supprimer le dossier</h1><?php
+            }
+        } elseif (isset($_POST['delname']) && !is_dir($_POST['delname'])) {
+            unlink($_POST['delname']);
+            header('Location:index.php');
+        }
 
 
         explore('files');
@@ -91,10 +112,9 @@
     </div>
 
     <script>
-        $(".dossier").on('click', function(e) {
+        $(".dossier").on('click', function (e) {
             $('.fichier').toggle('.fichier');
         });
-
 
 
     </script>
